@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0f16">
+<title>Wild Rift Build Simulator</title>
+<style>
+:root{--bg:#080b11;--panel:#101620;--panel2:#151d29;--line:#263142;--text:#eef3f8;--muted:#94a0b1;--accent:#43a5ff;--good:#57d68d;--warn:#ffcc66;--danger:#ff667a}
+*{box-sizing:border-box}html,body{margin:0;background:linear-gradient(180deg,#080b11,#0d121b);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Segoe UI",sans-serif}
+body{min-height:100vh}.wrap{max-width:1120px;margin:auto;padding:18px 14px 50px}
+header{padding:10px 2px 18px;border-bottom:1px solid var(--line);margin-bottom:16px}
+h1{font-size:27px;margin:0 0 5px}.sub{color:var(--muted);font-size:13px}.badge{display:inline-block;background:#182a3e;color:#77c1ff;border:1px solid #254d70;padding:3px 8px;border-radius:999px;font-size:11px;margin-left:6px}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.panel{background:rgba(16,22,32,.96);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.panel h2{font-size:16px;margin:0 0 12px}.full{grid-column:1/-1}
+label{font-size:12px;color:var(--muted);display:block;margin:0 0 5px}
+input,select,button{font:inherit}input,select{width:100%;background:#0b1018;color:var(--text);border:1px solid #344154;border-radius:9px;padding:10px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}button{border:1px solid #36506a;background:#15263a;color:#dceeff;border-radius:9px;padding:9px 12px;cursor:pointer}button:hover{filter:brightness(1.12)}button.danger{background:#2b151b;border-color:#5a2630;color:#ff9eab}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.formgrid.three{grid-template-columns:repeat(3,1fr)}
+.itemgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.slot{background:#0c121a;border:1px solid #273446;border-radius:10px;padding:8px}.slot small{color:#6f7c8e;display:block;margin-bottom:5px}
+.runes{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.stat{background:#0c121a;border:1px solid #273446;border-radius:10px;padding:10px}.stat b{font-size:18px;display:block}.stat span{font-size:11px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:8px;border-bottom:1px solid #222d3b;text-align:left}th{color:var(--muted);font-weight:500}
+.notice{padding:10px 12px;border:1px solid #3b4a5e;border-radius:10px;color:#b9c5d4;background:#0d141e;font-size:12px;line-height:1.6;margin-bottom:12px}
+.small{font-size:11px;color:var(--muted);line-height:1.6}.pill{display:inline-block;padding:2px 6px;border-radius:999px;background:#192433;color:#a9d8ff;margin:2px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.itemgrid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.wrap{padding:12px 10px 40px}h1{font-size:23px}.formgrid,.formgrid.three,.runes{grid-template-columns:1fr}.itemgrid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Wild Rift Build Simulator <span class="badge">7.2e</span></h1>
+<div class="sub">チャンピオン・アイテム・ルーンを組み合わせて、ビルド後のステータスとダメージを確認</div>
+</header>
+
+<div class="notice">
+<b>現在の基準パッチ：7.2e</b><br>
+2026/09/21時点のライブ環境を基準にしています。7.2eではヴァイ、スウェイン、ジャンナ、ノーチラス、マルファイト等と一部アイテムが調整されています。アイテム欄は主要アイテムを収録。チャンピオンの基礎ステータスは入力式なので、ゲーム内の値を入れると正確に計算できます。
+</div>
+
+<div class="grid">
+<section class="panel">
+<h2>① チャンピオン</h2>
+<div class="formgrid">
+<div><label>チャンピオン</label><select id="champ"></select></div>
+<div><label>レベル</label><input id="level" type="number" min="1" max="15" value="15"></div>
+</div>
+<div class="formgrid three" style="margin-top:10px">
+<div><label>基礎AD</label><input id="baseAD" type="number" step="0.1" value="100"></div>
+<div><label>基礎HP</label><input id="baseHP" type="number" step="1" value="2000"></div>
+<div><label>基礎AR</label><input id="baseAR" type="number" step="0.1" value="80"></div>
+<div><label>基礎MR</label><input id="baseMR" type="number" step="0.1" value="50"></div>
+<div><label>基礎AP</label><input id="baseAP" type="number" step="1" value="0"></div>
+<div><label>基礎AS</label><input id="baseAS" type="number" step="0.01" value="0.7"></div>
+</div>
+<div id="champInfo" class="small" style="margin-top:10px"></div>
+</section>
+
+<section class="panel">
+<h2>② ルーン</h2>
+<div class="runes">
+<div><label>キーストーン</label><select id="keystone">
+<option>電撃</option><option>征服者</option><option>魂の収穫</option><option>不死者の握撃</option><option>エアリー召喚</option><option>フェイズラッシュ</option><option>フリートフットワーク</option>
+</select></div>
+<div><label>ルーン1</label><select id="r1"><option>ブルータル</option><option>レジェンド：迅速</option><option>切り崩し</option><option>ボーンアーマー</option><option>生命の泉</option><option>忍耐</option></select></div>
+<div><label>ルーン2</label><select id="r2"><option>レジェンド：迅速</option><option>ブルータル</option><option>切り崩し</option><option>超成長</option><option>巨人の勇気</option><option>ボーンアーマー</option></select></div>
+<div><label>ルーン3</label><select id="r3"><option>切り崩し</option><option>ブルータル</option><option>超成長</option><option>巨人の勇気</option><option>忍耐</option><option>生命の泉</option></select></div>
+</div>
+<div class="small" style="margin-top:10px">※ルーンの複雑な発動条件は簡略化し、ステータスへ直接反映できるものだけ計算します。</div>
+</section>
+
+<section class="panel full">
+<h2>③ アイテム（6枠）</h2>
+<div class="itemgrid" id="items"></div>
+<div class="actions"><button id="clearItems" class="danger">アイテムを全解除</button></div>
+</section>
+
+<section class="panel full">
+<h2>④ ビルド後ステータス</h2>
+<div class="stats" id="stats"></div>
+<div style="margin-top:12px;overflow:auto"><table><thead><tr><th>項目</th><th>値</th><th>内訳</th></tr></thead><tbody id="detail"></tbody></table></div>
+</section>
+
+<section class="panel">
+<h2>⑤ ダメージ計算</h2>
+<div class="formgrid">
+<div><label>物理/魔法</label><select id="dtype"><option value="physical">物理</option><option value="magic">魔法</option></select></div>
+<div><label>スキル等の生ダメージ</label><input id="raw" type="number" value="500"></div>
+<div><label>敵AR</label><input id="enemyAR" type="number" value="100"></div>
+<div><label>敵MR</label><input id="enemyMR" type="number" value="100"></div>
+</div>
+<div class="stats" style="margin-top:10px"><div class="stat"><span>軽減後ダメージ</span><b id="damage">250</b></div><div class="stat"><span>有効AR/MR</span><b id="effectiveRes">100</b></div></div>
+<div class="small" style="margin-top:8px">物理/魔法防御100未満は通常の耐久軽減式を使用。貫通は収録アイテムの単純合算として計算します。特殊パッシブ・スキル固有係数・スタック等は別途です。</div>
+</section>
+
+<section class="panel">
+<h2>⑥ 保存</h2>
+<div class="actions"><button id="save">このビルドを保存</button><button id="load">保存したビルドを読み込む</button><button id="reset" class="danger">初期化</button></div>
+<div id="saveMsg" class="small" style="margin-top:10px"></div>
+</section>
+
+<section class="panel full">
+<h2>データについて</h2>
+<div class="small">
+アイテムの主要な数値はWild Riftのパッチ7.2e資料を基準にしています。7.2eの公式パッチノートでは、シーカー アームガード、ヴァーダント バリア、赤月の刃、終わりなき絶望などが調整されています。チャンピオン一覧はWild Rift向けの公開データAPIを利用し、取得できない場合でも基本的な選択肢が表示されるようにしています。<br><br>
+このページはRiot Games非公式のファンツールです。ゲーム内の最新表示と差がある場合はゲーム内表示を優先してください。
+</div>
+</section>
+</div>
+</div>
+
+<script>
+const itemsData=[
+["インフィニティ エッジ",3400,65,0,0,0,0,0,25,0,0,0],
+["ディヴァイン サンダラー",3400,25,0,425,0,0,0,0,0,25,0],
+["ラバドン デスキャップ",3400,0,130,0,0,0,0,0,0,0,0],
+["トリニティ フォース",3333,30,0,333,0,0,30,0,0,0,0],
+["セリルダの怨恨",3300,40,0,0,0,0,0,0,0,15,33],
+["ゾーニャの砂時計",3300,0,110,0,40,0,0,0,0,0,0],
+["テルミヌス",3300,40,0,0,0,0,30,0,0,0,0],
+["ドミニクリガード",3300,30,0,0,0,0,0,25,0,0,36],
+["モータル リマインダー",3300,25,0,0,0,0,15,25,0,0,30],
+["ガーディアン エンジェル",3200,45,0,0,40,0,0,0,0,0,0],
+["ステラックの篭手",3200,0,0,400,0,0,0,0,0,0,0],
+["ルインドキング ブレード",3200,40,0,0,0,0,35,0,10,0,0],
+["覇王のブラッドメイル",3200,30,0,450,0,0,0,0,0,0,0],
+["魂の転移",3200,25,0,0,0,0,30,25,0,0,0],
+["アマランス ツインガード",3100,0,0,0,60,60,0,0,0,0,0],
+["インフィニティ オーブ",3100,0,110,0,0,0,0,0,15,0,0],
+["グインソー レイジブレード",3100,0,0,0,0,0,30,0,0,0,0],
+["ゲイルフォース",3100,50,0,0,0,0,15,25,0,0,0],
+["ゴアドリンカー",3100,40,0,350,0,0,0,0,0,15,0],
+["ショウジンの矛",3100,40,0,450,0,0,0,0,0,20,0],
+["ストライドブレイカー",3100,40,0,400,0,0,25,0,0,0,0],
+["デス ダンス",3100,35,0,0,40,0,0,0,0,15,0],
+["ハルブレイカー",3100,50,0,400,0,0,0,0,0,0,0],
+["マーキュリアル シミター",3100,45,0,0,0,40,0,0,0,0,0],
+["リフトメーカー",3100,0,70,350,0,0,0,0,0,15,0],
+["黄昏と暁",3100,0,70,350,0,0,25,0,0,15,0],
+["アークエンジェル スタッフ",3000,0,60,0,0,0,0,0,0,25,0],
+["アイスボーン ガントレット",3000,0,0,300,50,0,0,0,0,0,0],
+["アビサル マスク",3000,0,0,400,0,55,0,0,0,10,0],
+["エッセンス リーバー",3000,40,0,0,0,0,0,25,0,20,0],
+["クリプトブルーム",3000,0,75,0,0,0,0,0,30,20,0],
+["コズミック ドライブ",3000,0,70,300,0,0,0,0,0,25,0],
+["コレクター",3000,45,0,0,0,0,0,25,0,0,10],
+["タイタン ハイドラ",3000,40,0,450,0,0,0,0,0,0,0],
+["ドラクサー ダスクブレード",3000,55,0,0,0,0,0,0,0,10,18],
+["ナイトエッジ",3000,50,0,250,0,0,0,0,0,0,12],
+["ブルートフォース",3000,40,0,300,0,0,0,0,0,15,0],
+["フローズンハート",2900,0,0,350,75,0,0,0,0,20,0],
+["自然の力",2900,0,0,350,0,55,0,0,0,10,0],
+["ソーンメイル",2800,0,0,300,75,0,0,0,0,0,0],
+["ランデュイン オーメン",2800,0,0,400,60,0,0,0,0,0,0],
+["デッドマン プレート",2800,40,0,300,0,0,0,0,0,0,0],
+["ナッシャー トゥース",2800,0,70,0,0,0,50,0,0,20,0],
+["リッチ ベイン",2800,0,80,0,0,0,0,0,0,15,0],
+["モレロノミコン",2800,0,75,300,0,0,0,0,15,0,0],
+["ブラッドサースター",3000,55,0,250,0,0,0,25,0,0,0],
+["スイフトネス ブーツ",1000,0,0,0,0,0,0,0,0,0,0],
+["マーキュリー ブーツ",1000,0,0,0,0,0,0,0,0,0,0],
+["プレート スチールキャップ",1000,0,0,0,25,0,0,0,0,0,0]
+];
+// name,cost,AD,AP,HP,AR,MR,AS,crit,mpen,AH,arp
+
+const fallbackChamps=["アーリ","アカリ","アムム","アリスター","アッシュ","アウレリオン・ソル","ブラウム","ケイトリン","カミール","カタリナ","カ・サンテ","カ＝ジックス","コーキ","ダリウス","ダイアナ","ドクター・ムンド","ドレイヴン","エコー","エズリアル","フィオラ","フィズ","ガリオ","ガレン","グレイブス","グウェン","イレリア","イヴリン","ジャックス","ジャンナ","ジンクス","カイ＝サ","カルマ","カサディン","ケイル","ケネン","レオナ","リリア","ルシアン","ルル","マルファイト","マルキン","マスター・イー","ミス・フォーチュン","モルデカイザー","モルガナ","ナミ","ナサス","ノーチラス","ニーコ","ニダリー","オラフ","オリアナ","オーン","パンテオン","パイク","ポッピー","ラカン","ラームス","レネクトン","レンガー","リヴェン","セナ","セラフィーン","シェン","シヴァーナ","シンジド","シンドラ","スカーナー","ソナ","ソラカ","スウェイン","タリヤ","タム・ケンチ","トリスターナ","トリンダメア","ツイステッド・フェイト","ウディア","ヴァイ","ヴァルス","ヴェイン","ヴェル＝コズ","ヴィエゴ","ビクター","ワーウィック","ヤスオ","ヨネ","ユナラ","ユーミ","ザヤ","ゼド","ゼリ","ゼラス","ジグス","ゾーイ","ゾウンの奇才","シン・ジャオ","ケイトリン","オレリオン・ソル","チョ＝ガス","フェイ"];
+const champ=document.getElementById("champ");
+[...new Set(fallbackChamps)].sort((a,b)=>a.localeCompare(b,"ja")).forEach(n=>champ.add(new Option(n,n)));
+
+async function loadChamps(){
+  try{
+    const c=new AbortController(); setTimeout(()=>c.abort(),3500);
+    const r=await fetch("https://ry2x.github.io/WildRift-Merged-Champion-Data/data_ja_JP.json",{signal:c.signal});
+    const data=await r.json();
+    const names=[...new Set(data.filter(x=>x.is_wr).map(x=>x.name))].sort((a,b)=>a.localeCompare(b,"ja"));
+    if(names.length>20){
+      champ.innerHTML=""; names.forEach(n=>champ.add(new Option(n,n)));
+      champInfo.textContent="公開Wild Riftチャンピオンデータを取得しました。";
+    }
+  }catch(e){champInfo.textContent="チャンピオン一覧は内蔵データを使用中。通信が可能なら自動で最新一覧に更新します。";}
+}
+loadChamps();
+
+const itemBox=document.getElementById("items");
+for(let i=0;i<6;i++){
+  const d=document.createElement("div");d.className="slot";
+  d.innerHTML=`<small>スロット ${i+1}</small><select data-slot="${i}"><option value="">なし</option></select>`;
+  const s=d.querySelector("select");
+  itemsData.forEach((x,j)=>s.add(new Option(`${x[0]} — ${x[1]}G`,j)));
+  itemBox.appendChild(d);
+}
+
+function num(id){return Number(document.getElementById(id).value)||0}
+function selectedItems(){return [...document.querySelectorAll("[data-slot]")].map(s=>s.value===""?null:itemsData[Number(s.value)]).filter(Boolean)}
+function calc(){
+  const its=selectedItems();
+  let AD=num("baseAD"),AP=num("baseAP"),HP=num("baseHP"),AR=num("baseAR"),MR=num("baseMR"),AS=num("baseAS");
+  let crit=0,ah=0,mpen=0,arp=0,asPct=0;
+  its.forEach(x=>{AD+=x[2];AP+=x[3];HP+=x[4];AR+=x[5];MR+=x[6];asPct+=x[7];crit+=x[8];mpen+=x[9];ah+=x[10];arp+=x[11]});
+  AS*=1+asPct/100;
+  // 7.2 rune stat simplifications
+  if(["ブルータル"].includes(r1.value)||["ブルータル"].includes(r2.value)||["ブルータル"].includes(r3.value)) AD+=5;
+  if(["レジェンド：迅速"].includes(r1.value)||["レジェンド：迅速"].includes(r2.value)||["レジェンド：迅速"].includes(r3.value)) AS*=1.18;
+  if(["忍耐"].includes(r1.value)||["忍耐"].includes(r2.value)||["忍耐"].includes(r3.value)){AR+=10;MR+=10;}
+  if(["超成長"].includes(r1.value)||["超成長"].includes(r2.value)||["超成長"].includes(r3.value)) HP+=60;
+  const vals=[["AD",AD,"基礎 "+num("baseAD")+" + アイテム/ルーン"],["AP",AP,"基礎 "+num("baseAP")+" + アイテム"],["HP",HP,"基礎 "+num("baseHP")+" + アイテム/ルーン"],["AR",AR,"基礎 "+num("baseAR")+" + アイテム/ルーン"],["MR",MR,"基礎 "+num("baseMR")+" + アイテム/ルーン"],["AS",AS.toFixed(2),"基礎 × アイテム/ルーン"],["クリティカル",crit+"%","アイテム"],["スキルヘイスト",ah,"アイテム"],["物理防御貫通",arp+"% + "+0,"アイテム"],["魔法防御貫通",mpen+"%","アイテム"]];
+  const stats=document.getElementById("stats");stats.innerHTML="";
+  vals.slice(0,8).forEach(v=>{stats.innerHTML+=`<div class="stat"><span>${v[0]}</span><b>${v[1]}</b></div>`});
+  document.getElementById("detail").innerHTML=vals.map(v=>`<tr><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`).join("");
+  const type=document.getElementById("dtype").value, raw=num("raw");
+  let res=type==="physical"?num("enemyAR"):num("enemyMR");
+  if(type==="physical") res=res*(1-arp/100);
+  else res=res*(1-mpen/100);
+  const mult=res>=0?100/(100+res):2-100/(100-res);
+  document.getElementById("effectiveRes").textContent=Math.round(res*10)/10;
+  document.getElementById("damage").textContent=Math.round(raw*mult*10)/10;
+}
+document.querySelectorAll("input,select").forEach(e=>e.addEventListener("input",calc));
+document.querySelectorAll("select").forEach(e=>e.addEventListener("change",calc));
+document.getElementById("clearItems").onclick=()=>{document.querySelectorAll("[data-slot]").forEach(s=>s.value="");calc()};
+document.getElementById("reset").onclick=()=>{localStorage.removeItem("wrBuild");location.reload()};
+document.getElementById("save").onclick=()=>{
+  const data={champ:champ.value,level:num("level"),baseAD:num("baseAD"),baseHP:num("baseHP"),baseAR:num("baseAR"),baseMR:num("baseMR"),baseAP:num("baseAP"),baseAS:num("baseAS"),keystone:keystone.value,r1:r1.value,r2:r2.value,r3:r3.value,items:[...document.querySelectorAll("[data-slot]")].map(s=>s.value)};
+  localStorage.setItem("wrBuild",JSON.stringify(data));saveMsg.textContent="この端末のブラウザに保存しました。";
+};
+document.getElementById("load").onclick=()=>{
+  const d=JSON.parse(localStorage.getItem("wrBuild")||"null"); if(!d){saveMsg.textContent="保存データがありません。";return}
+  champ.value=d.champ;["level","baseAD","baseHP","baseAR","baseMR","baseAP","baseAS","keystone","r1","r2","r3"].forEach(k=>document.getElementById(k).value=d[k]);
+  document.querySelectorAll("[data-slot]").forEach((s,i)=>s.value=d.items[i]||"");calc();saveMsg.textContent="保存したビルドを読み込みました。";
+};
+calc();
+</script>
+</body>
+</html>
